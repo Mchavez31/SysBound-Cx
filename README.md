@@ -2,6 +2,16 @@
 
 Multi-project engineering drawing systemization tool.
 
+### GitHub Pages vs this README
+
+The page on **github.com/yourname/Systemize** is the **repository** — it always shows this `README.md` below the file list. That is normal.
+
+The **deployed React app** is a separate URL:
+
+**`https://yourname.github.io/Systemize/`**
+
+(Replace `yourname` with your GitHub username.) After each push, wait for **Actions → Deploy to GitHub Pages** to finish (green). If the first deploy waits for approval, open **Settings → Environments → github-pages** and approve.
+
 ---
 
 ## Local Setup
@@ -14,7 +24,7 @@ node --version       # Need 18+
 ```
 
 ### 2. Clone / open in Cursor
-Open the `systemization-app` folder in Cursor.
+Open the project folder in Cursor.
 
 ### 3. Set up the backend
 

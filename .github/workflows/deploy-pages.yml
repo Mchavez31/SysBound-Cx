@@ -35,16 +35,24 @@ jobs:
         # Optional: set in repo → Settings → Secrets → Actions
         # env:
         #   VITE_API_URL: ${{ secrets.VITE_API_URL }}
-      - uses: actions/upload-pages-artifact@v3
+      # Required so Pages accepts the artifact (see GitHub Pages + Actions docs)
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
