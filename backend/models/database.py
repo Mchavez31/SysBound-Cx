@@ -24,7 +24,7 @@ class Project(Base):
     name = Column(String, nullable=False)
     description = Column(Text)
     client = Column(String)
-    facility_type = Column(String)  # WCF, WOC, BT1, BT2, BT3, KPAD, etc.
+    facility_type = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -32,13 +32,14 @@ class Project(Base):
     drawings = relationship("Drawing", back_populates="project")
     subsystems = relationship("Subsystem", back_populates="project")
     color_palettes = relationship("ColorPalette", back_populates="project")
+    comparisons = relationship("Comparison", back_populates="project")
 
 class ProjectMember(Base):
     __tablename__ = "project_members"
     id = Column(String, primary_key=True, default=gen_uuid)
     project_id = Column(String, ForeignKey("projects.id"), nullable=False)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    role = Column(String, default="editor")  # owner, editor, viewer
+    role = Column(String, default="editor")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     project = relationship("Project", back_populates="members")
     user = relationship("User", back_populates="projects")
@@ -47,9 +48,9 @@ class Subsystem(Base):
     __tablename__ = "subsystems"
     id = Column(String, primary_key=True, default=gen_uuid)
     project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    number = Column(String, nullable=False)       # e.g. "57-01"
-    description = Column(String, nullable=False)  # e.g. "Potable Water Treatment Package"
-    system_group = Column(String)                 # e.g. "57"
+    number = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    system_group = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     project = relationship("Project", back_populates="subsystems")
@@ -58,11 +59,11 @@ class ColorPalette(Base):
     __tablename__ = "color_palettes"
     id = Column(String, primary_key=True, default=gen_uuid)
     project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    plant = Column(String, nullable=False)         # WCF, WOC, DrillSites, KPAD, Infrastructure
-    drawing_type = Column(String, nullable=False)  # P&ID, SLD, PFD, Panel Schedule, Telecom, Automation
+    plant = Column(String, nullable=False)
+    drawing_type = Column(String, nullable=False)
     subsystem_number = Column(String, nullable=False)
     subsystem_description = Column(String)
-    hex_color = Column(String, nullable=False)     # e.g. "#0080FF"
+    hex_color = Column(String, nullable=False)
     r = Column(Integer)
     g = Column(Integer)
     b = Column(Integer)
@@ -73,18 +74,30 @@ class Drawing(Base):
     __tablename__ = "drawings"
     id = Column(String, primary_key=True, default=gen_uuid)
     project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    drawing_number = Column(String, nullable=False)  # e.g. "WILG-WF00-PRO-PID-WOD-00000-31006-01"
+    drawing_number = Column(String, nullable=False)
     drawing_title = Column(String)
-    drawing_type = Column(String)   # P&ID, SLD, PFD, etc.
-    plant = Column(String)          # WCF, WOC, BT1, etc.
+    drawing_type = Column(String)
+    plant = Column(String)
     module = Column(String)
     revision = Column(String)
     is_systemized = Column(Boolean, default=False)
-    status = Column(String, default="uploaded")  # uploaded, compared, systemized, approved, published
+    status = Column(String, default="uploaded")
     systemized_pdf_path = Column(String)
     original_pdf_path = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    drawing_role = Column(String, default="new_engineering")
+    file_path = Column(String)
+    file_name = Column(String)
+    page_count = Column(Integer)
+    detected_drawing_number = Column(String)
+    detected_drawing_title = Column(String)
+    detected_drawing_type = Column(String)
+    detected_plant = Column(String)
+    detected_revision = Column(String)
+    extraction_error = Column(Text)
+
     project = relationship("Project", back_populates="drawings")
     tags = relationship("Tag", back_populates="drawing")
     revisions = relationship("DrawingRevision", back_populates="drawing")
@@ -99,25 +112,52 @@ class DrawingRevision(Base):
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
     drawing = relationship("Drawing", back_populates="revisions")
 
+class Comparison(Base):
+    __tablename__ = "comparisons"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    drawing_id_a = Column(String, ForeignKey("drawings.id"), nullable=False)
+    drawing_id_b = Column(String, ForeignKey("drawings.id"), nullable=False)
+    comparison_type = Column(String, nullable=False)
+    status = Column(String, default="pending")
+    run_at = Column(DateTime(timezone=True))
+    total_new = Column(Integer, default=0)
+    total_removed = Column(Integer, default=0)
+    total_unchanged = Column(Integer, default=0)
+    total_subsystem_changes = Column(Integer, default=0)
+    result_json = Column(Text)
+    # Polled by GET …/progress; stored in DB so multi-worker / any process sees the same values.
+    progress_percent = Column(Integer, default=0)
+    progress_message = Column(String, default="")
+
+    project = relationship("Project", back_populates="comparisons")
+
 class Tag(Base):
     __tablename__ = "tags"
     id = Column(String, primary_key=True, default=gen_uuid)
     drawing_id = Column(String, ForeignKey("drawings.id"), nullable=False)
     project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    comparison_id = Column(String, ForeignKey("comparisons.id"), nullable=True)
     tag_number = Column(String, nullable=False, index=True)
-    tag_type = Column(String)        # MV, XV, SDV, P, T, etc.
+    tag_type = Column(String)
+    tag_category = Column(String)
     tag_description = Column(String)
     subsystem_number = Column(String, index=True)
-    subsystem_source = Column(String)  # manual, ai_suggested, carried_over
+    subsystem_source = Column(String)
+    previous_subsystem = Column(String)
     ai_confidence = Column(Float)
     ai_reasoning = Column(Text)
-    status = Column(String, default="pending")  # pending, approved, flagged, excluded
+    status = Column(String, default="pending")
     is_x_tag = Column(Boolean, default=False)
     page_x = Column(Float)
     page_y = Column(Float)
     page_number = Column(Integer)
+    color_in_drawing = Column(String)
+    action_needed = Column(String)
+    change_type = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
     drawing = relationship("Drawing", back_populates="tags")
     history = relationship("TagHistory", back_populates="tag")
 
@@ -138,8 +178,8 @@ class SystemizationRule(Base):
     __tablename__ = "systemization_rules"
     id = Column(String, primary_key=True, default=gen_uuid)
     project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    rule_type = Column(String)       # tag_pattern, line_routing, adjacency, manual
-    pattern = Column(String)         # e.g. "MV-306XXXX" or "tag_prefix:MV-30"
+    rule_type = Column(String)
+    pattern = Column(String)
     subsystem_number = Column(String)
     confidence = Column(Float, default=1.0)
     example_tag = Column(String)

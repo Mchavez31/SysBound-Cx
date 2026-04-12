@@ -2,11 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from database_connection import engine, Base
+from db_migrate import migrate_sqlite
 from routes import auth, projects, drawings, tags, palettes, subsystems
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    migrate_sqlite(engine)
     yield
 
 app = FastAPI(

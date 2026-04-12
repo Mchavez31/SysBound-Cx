@@ -78,6 +78,20 @@ export default function ProjectLayout() {
               {icon} {label}
             </NavLink>
           ))}
+          <NavLink
+            to={`/project/${projectId}/drawings#comparisons`}
+            style={({ isActive }) => ({
+              display: 'flex', alignItems: 'center', gap: 9,
+              padding: '8px 10px', borderRadius: 7, marginBottom: 2,
+              color: isActive ? 'white' : 'rgba(255,255,255,0.55)',
+              background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+              fontWeight: isActive ? 500 : 400, fontSize: 13,
+              textDecoration: 'none', transition: 'all 0.12s',
+            })}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11H5a2 2 0 01-2-2V5a2 2 0 012-2h4M15 13h4a2 2 0 002-2V5a2 2 0 00-2-2h-4M9 11V9a2 2 0 012-2h2a2 2 0 012 2v2M9 11v6a2 2 0 002 2h2a2 2 0 002-2v-6"/></svg>
+            Comparisons
+          </NavLink>
         </nav>
 
         {/* User footer */}

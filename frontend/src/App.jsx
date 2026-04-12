@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage'
 import PalettesPage from './pages/PalettesPage'
 import SubsystemsPage from './pages/SubsystemsPage'
 import DrawingsPage from './pages/DrawingsPage'
+import ComparisonPage from './pages/ComparisonPage'
 
 function RequireAuth({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="palettes" element={<PalettesPage />} />
         <Route path="subsystems" element={<SubsystemsPage />} />
         <Route path="drawings" element={<DrawingsPage />} />
+        <Route path="comparison/:comparisonId" element={<ComparisonPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/projects" replace />} />
     </Routes>

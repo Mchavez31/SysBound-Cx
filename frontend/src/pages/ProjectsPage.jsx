@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import useAuthStore from '../hooks/useAuthStore'
 import useProjectStore from '../hooks/useProjectStore'
-import api from '../lib/api'
+import api, { formatAxiosError } from '../lib/api'
 import toast from 'react-hot-toast'
 
 const FACILITY_TYPES = ['WCF', 'WOC', 'BT1', 'BT2', 'BT3', 'KPAD', 'Infrastructure', 'Mixed', 'Other']
@@ -118,9 +118,17 @@ export default function ProjectsPage() {
   const setActiveProject = useProjectStore((s) => s.setActiveProject)
   const navigate = useNavigate()
 
-  const { data: projects = [], isLoading } = useQuery({
+  const {
+    data: projects = [],
+    isLoading,
+    isError,
+    error: projectsError,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: ['projects'],
     queryFn: () => api.get('/projects').then((r) => r.data),
+    retry: 1,
   })
 
   function handleSelectProject(project) {
@@ -160,7 +168,24 @@ export default function ProjectsPage() {
           </button>
         </div>
 
-        {isLoading ? (
+        {isError ? (
+          <div className="card" style={{ padding: 28, maxWidth: 520, margin: '0 auto' }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: '#b91c1c' }}>Could not reach the server</h2>
+            <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.6, marginBottom: 12 }}>
+              {formatAxiosError(projectsError, 'Request failed')}
+            </p>
+            <p style={{ fontSize: 13, color: '#6b7280', lineHeight: 1.6, marginBottom: 16 }}>
+              From the <strong>project root</strong>, run <code style={{ background: '#f3f4f6', padding: '2px 6px', borderRadius: 4 }}>npm run dev</code> (API on port <strong>8020</strong> + UI). Open{' '}
+              <a href="http://127.0.0.1:8020/api/health" style={{ color: '#2563eb' }} target="_blank" rel="noreferrer">
+                http://127.0.0.1:8020/api/health
+              </a>{' '}
+              — if that never loads, a stuck process may be blocking ports; restart your PC or end old <code style={{ background: '#f3f4f6', padding: '2px 6px', borderRadius: 4 }}>python.exe</code> in Task Manager. Then retry.
+            </p>
+            <button type="button" className="accent" onClick={() => refetch()} disabled={isFetching}>
+              {isFetching ? 'Retrying…' : 'Retry'}
+            </button>
+          </div>
+        ) : isLoading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#6b7280' }}>Loading projects…</div>
         ) : projects.length === 0 ? (
           <div className="card empty-state">

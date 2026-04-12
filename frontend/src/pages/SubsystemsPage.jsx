@@ -22,7 +22,7 @@ export default function SubsystemsPage() {
     const form = new FormData()
     form.append('file', file)
     try {
-      const res = await api.post(`/subsystems/${projectId}/upload`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await api.post(`/subsystems/${projectId}/upload`, form)
       toast.success(`Imported ${res.data.imported} subsystems`)
       qc.invalidateQueries(['subsystems', projectId])
     } catch (err) {

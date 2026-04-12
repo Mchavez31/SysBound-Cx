@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useAuthStore from '../hooks/useAuthStore'
+import { isUnreachableAxiosError, toastAxiosError } from '../lib/api'
 import toast from 'react-hot-toast'
 
 export default function RegisterPage() {
@@ -20,7 +21,20 @@ export default function RegisterPage() {
       navigate('/projects')
       toast.success('Account created!')
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Registration failed')
+      if (isUnreachableAxiosError(err)) {
+        toastAxiosError(err, 'Registration failed')
+      } else {
+        const d = err.response?.data?.detail
+        const msg =
+          err.response && d != null
+            ? Array.isArray(d)
+              ? d.map((x) => x.msg || String(x)).join('; ')
+              : typeof d === 'string'
+                ? d
+                : 'Registration failed'
+            : 'Registration failed'
+        toast.error(msg, { duration: 8000 })
+      }
     } finally {
       setLoading(false)
     }

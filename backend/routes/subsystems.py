@@ -38,9 +38,7 @@ def create_subsystem(project_id: str, req: SubsystemCreate, db: Session = Depend
 @router.post("/{project_id}/upload")
 async def upload_subsystem_register(project_id: str, file: UploadFile = File(...),
                                      db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    m = check_access(project_id, current_user.id, db)
-    if m.role not in ["owner", "editor"]:
-        raise HTTPException(status_code=403, detail="Editors and owners only")
+    check_access(project_id, current_user.id, db)
     content = await file.read()
     wb = openpyxl.load_workbook(io.BytesIO(content))
     ws = wb.active

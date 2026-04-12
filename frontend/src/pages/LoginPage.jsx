@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useAuthStore from '../hooks/useAuthStore'
+import { isUnreachableAxiosError, toastAxiosError } from '../lib/api'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -17,13 +18,20 @@ export default function LoginPage() {
       await login(email, password)
       navigate('/projects')
     } catch (err) {
-      const d = err.response?.data?.detail
-      const msg = Array.isArray(d)
-        ? d.map((x) => x.msg || String(x)).join('; ')
-        : typeof d === 'string'
-          ? d
-          : err.message || 'Login failed'
-      toast.error(msg)
+      if (isUnreachableAxiosError(err)) {
+        toastAxiosError(err, 'Login failed')
+      } else {
+        const d = err.response?.data?.detail
+        const msg =
+          err.response && d != null
+            ? Array.isArray(d)
+              ? d.map((x) => x.msg || String(x)).join('; ')
+              : typeof d === 'string'
+                ? d
+                : 'Login failed'
+            : 'Login failed'
+        toast.error(msg, { duration: 8000 })
+      }
     } finally {
       setLoading(false)
     }
@@ -60,6 +68,17 @@ export default function LoginPage() {
         <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: '#6b7280' }}>
           Don't have an account? <Link to="/register" style={{ color: '#2563eb', fontWeight: 500 }}>Create one</Link>
         </p>
+        {import.meta.env.DEV ? (
+          <p style={{ textAlign: 'center', marginTop: 14, fontSize: 11, color: '#9ca3af', lineHeight: 1.5 }}>
+            Local dev: from the <strong>project root</strong> run <code style={{ background: '#e5e7eb', padding: '1px 5px', borderRadius: 4 }}>npm install</code> once, then{' '}
+            <code style={{ background: '#e5e7eb', padding: '1px 5px', borderRadius: 4 }}>npm run dev</code> (API on port <strong>8020</strong> + UI). Or run{' '}
+            <code style={{ background: '#e5e7eb', padding: '1px 5px', borderRadius: 4 }}>backend/run_dev.bat</code> and <code style={{ background: '#e5e7eb', padding: '1px 5px', borderRadius: 4 }}>npm run dev</code> in{' '}
+            <code style={{ background: '#e5e7eb', padding: '1px 5px', borderRadius: 4 }}>frontend</code>. Test API:{' '}
+            <a href="http://127.0.0.1:8020/api/health" style={{ color: '#2563eb' }} target="_blank" rel="noreferrer">
+              127.0.0.1:8020/api/health
+            </a>
+          </p>
+        ) : null}
       </div>
     </div>
   )

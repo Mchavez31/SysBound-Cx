@@ -1,0 +1,14 @@
+{
+  "name": "systemization-app",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd backend && python -m uvicorn main:app --host 127.0.0.1 --port 8020",
+    "dev:api:reload": "cd backend && python -m uvicorn main:app --reload --host 127.0.0.1 --port 8020",
+    "dev:web": "cd frontend && npm run dev",
+    "fix:api-port": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/free-port.ps1 -Port 8020"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

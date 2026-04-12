@@ -34,7 +34,7 @@ export default function PalettesPage() {
     const form = new FormData()
     form.append('file', file)
     try {
-      const res = await api.post(`/palettes/${projectId}/upload?plant=${uploadPlant}`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await api.post(`/palettes/${projectId}/upload?plant=${encodeURIComponent(uploadPlant)}`, form)
       toast.success(`Imported ${res.data.imported} color entries for ${uploadPlant}`)
       qc.invalidateQueries(['palettes', projectId])
       qc.invalidateQueries(['palette-summary', projectId])

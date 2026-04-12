@@ -93,7 +93,8 @@ def list_palettes(project_id: str, plant: Optional[str] = None, drawing_type: Op
 @router.post("/{project_id}/upload")
 async def upload_palette(project_id: str, plant: str, file: UploadFile = File(...),
                          db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    check_project_access(project_id, current_user.id, db, roles=["owner", "editor"])
+    # Any project member may upload (same as drawings); viewers included for data imports
+    check_project_access(project_id, current_user.id, db)
     content = await file.read()
     entries = extract_palettes_from_xlsx(content, plant)
     if not entries:
