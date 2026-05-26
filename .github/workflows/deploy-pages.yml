@@ -32,9 +32,8 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: frontend
-        # Optional: set in repo → Settings → Secrets → Actions
-        # env:
-        #   VITE_API_URL: ${{ secrets.VITE_API_URL }}
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
       # Required so Pages accepts the artifact (see GitHub Pages + Actions docs)
       - name: Setup Pages
         uses: actions/configure-pages@v5

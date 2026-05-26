@@ -15,8 +15,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Systemization Platform API",
-    description="Multi-project engineering drawing systemization tool",
+    title="SysBound Cx API",
+    description="Multi-project engineering drawing commissioning and systemization tool",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -34,10 +34,11 @@ def _cors_origins() -> list[str]:
     return base
 
 
-# Regex allows any dev port / IPv6 [::1], and GitHub Pages where the SPA is deployed.
+# Regex allows dev ports, GitHub Pages, and Vercel frontends.
 _CORS_ORIGIN_REGEX = (
     r"https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$"
     r"|https://[a-zA-Z0-9][-a-zA-Z0-9]*\.github\.io$"
+    r"|https://[a-zA-Z0-9][-a-zA-Z0-9]*\.vercel\.app$"
 )
 
 app.add_middleware(
@@ -59,4 +60,4 @@ app.include_router(subsystems.router, prefix="/api/subsystems", tags=["subsystem
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "systemization-platform"}
+    return {"status": "ok", "service": "sysbound-cx"}

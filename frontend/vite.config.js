@@ -5,13 +5,13 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// Production build is served at https://<user>.github.io/Systemize/
+// Production build: GitHub Pages at https://mchavez31.github.io/SysBound-Cx/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '')
   const apiTarget = (env.VITE_DEV_PROXY_API || 'http://127.0.0.1:8020').trim()
 
   return {
-    base: mode === 'production' ? '/Systemize/' : '/',
+    base: mode === 'production' ? '/SysBound-Cx/' : '/',
     plugins: [react()],
     server: {
       proxy: {
