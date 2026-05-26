@@ -33,9 +33,7 @@ jobs:
         run: npm run build
         working-directory: frontend
         env:
-          # Set in repo Settings → Secrets and variables → Actions → Variables: VITE_API_URL
-          # Example: https://sysbound-cx-api.onrender.com/api
-          VITE_API_URL: ${{ vars.VITE_API_URL || secrets.VITE_API_URL }}
+          VITE_API_URL: https://sysbound-cx-api.onrender.com/api
       - name: SPA fallback for GitHub Pages routes
         run: cp dist/index.html dist/404.html
         working-directory: frontend
