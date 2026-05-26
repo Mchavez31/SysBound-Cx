@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useAuthStore from '../hooks/useAuthStore'
 import { isUnreachableAxiosError, toastAxiosError } from '../lib/api'
+import ApiStatusBanner from '../components/ApiStatusBanner'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -20,6 +21,13 @@ export default function LoginPage() {
     } catch (err) {
       if (isUnreachableAxiosError(err)) {
         toastAxiosError(err, 'Login failed')
+      } else if (!err.response) {
+        toast.error('Login failed — no response from server.', { duration: 8000 })
+      } else if (err.response.status === 404 || err.response.status === 405) {
+        toast.error(
+          'Backend API is not available on this site yet. Use local dev (npm run dev) or deploy the API on Render.',
+          { duration: 10000 }
+        )
       } else {
         const d = err.response?.data?.detail
         const msg =
@@ -51,6 +59,7 @@ export default function LoginPage() {
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Sign in to your account</p>
         </div>
         <div className="card">
+          <ApiStatusBanner />
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Email</label>
