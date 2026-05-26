@@ -1,86 +1,72 @@
-# Deploy SysBound Cx (Live Demo)
+# Deploy SysBound Cx — 100% Free Setup
 
-SysBound Cx is a full-stack app: **React frontend** + **FastAPI backend** + **PostgreSQL**.
+Everything below costs **$0**. No credit card required.
 
-## Live URLs (after setup)
+| Part | Host | Cost |
+|------|------|------|
+| Frontend UI | GitHub Pages | Free |
+| Backend API | Render (free web service) | Free |
+| Database | Render (free Postgres) | Free for 30 days* |
 
-| Part | URL |
-|------|-----|
-| Frontend (GitHub Pages) | https://mchavez31.github.io/SysBound-Cx/ |
-| Backend API (Render) | https://sysbound-cx-api.onrender.com (your Render URL) |
-
-The frontend UI can load on GitHub Pages before the API is connected, but login and data features require the Render backend.
-
----
-
-## Step 1: Enable GitHub Pages (Frontend)
-
-1. Open https://github.com/Mchavez31/SysBound-Cx
-2. **Settings → Pages → Build and deployment**
-3. Source: **GitHub Actions** (not "Deploy from branch")
-4. Push to `main` triggers the workflow (`.github/workflows/deploy-pages.yml`)
-
-After the Actions workflow completes, the UI is at:
-**https://mchavez31.github.io/SysBound-Cx/**
+\*Free Postgres expires after 30 days. Fine for portfolio/demo. Your real work can stay on **local dev** (`npm run dev`) with no time limit.
 
 ---
 
-## Step 2: Deploy Backend on Render
+## Free tier limits (good to know)
 
-1. Go to [render.com](https://render.com) and sign in with GitHub
-2. **New → Blueprint** and connect the `SysBound-Cx` repo, or use `render.yaml`
-3. Render creates:
-   - Web service: `sysbound-cx-api`
-   - PostgreSQL database: `sysbound-cx-db`
-4. After deploy, copy your API URL (e.g. `https://sysbound-cx-api.onrender.com`)
-
-### Render environment variables
-
-Set on the web service:
-
-| Variable | Value |
-|----------|-------|
-| `DATABASE_URL` | Auto-linked from Postgres |
-| `SECRET_KEY` | Auto-generated or run `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `FRONTEND_URL` | `https://mchavez31.github.io` |
-
-Test: open `https://YOUR-API.onrender.com/api/health` — should return `{"status":"ok"}`.
+- **API sleeps** after ~15 min idle — first click may take 30–60 sec to wake up
+- **Database** resets after 30 days on free Postgres (re-deploy or use local SQLite for long-term dev)
+- **No charges** unless you manually upgrade a service to Starter/paid
 
 ---
 
-## Step 3: Connect Frontend to API
+## 3 steps (about 10 minutes)
 
-1. GitHub repo → **Settings → Secrets and variables → Actions**
-2. New repository secret:
+### Step 1: Deploy free API on Render
+
+1. Open: **https://render.com/deploy?repo=https://github.com/Mchavez31/SysBound-Cx**
+2. Sign in with **GitHub** (no credit card)
+3. Click **Apply** — confirm both services show **Free** plan
+4. Wait until status is **Live**
+5. Copy your API URL (example: `https://sysbound-cx-api.onrender.com`)
+
+Test in browser: `https://YOUR-URL.onrender.com/api/health`  
+Should show: `{"status":"ok","service":"sysbound-cx"}`
+
+### Step 2: Connect frontend (GitHub — free)
+
+1. Open: https://github.com/Mchavez31/SysBound-Cx/settings/variables/actions
+2. **New repository variable**
    - Name: `VITE_API_URL`
-   - Value: `https://YOUR-API.onrender.com/api` (include `/api`, no trailing slash)
-3. Re-run the **Deploy to GitHub Pages** workflow (Actions tab → Run workflow)
+   - Value: `https://YOUR-URL.onrender.com/api`
+3. Open: https://github.com/Mchavez31/SysBound-Cx/actions/workflows/deploy-pages.yml
+4. Click **Run workflow**
+
+### Step 3: Use the app
+
+Live site: **https://mchavez31.github.io/SysBound-Cx/**
+
+Create your account there. If the first load is slow, wait — the free API is waking up.
 
 ---
 
-## Step 4: Update Portfolio Link
+## Or use local dev (free forever, no limits)
 
-In MRC-Portfolio `lib/resume-data.js`, set SysBound Cx `liveUrl`:
-
-```javascript
-liveUrl: "https://mchavez31.github.io/SysBound-Cx/",
-```
-
----
-
-## Notes
-
-- **Free Render tier** spins down after inactivity; first request may take 30–60 seconds.
-- **Work in progress** is fine — a live UI plus GitHub repo is enough for portfolio and LinkedIn.
-- PDF uploads and tag reports need the full stack (frontend + API + database).
-
----
-
-## Quick local dev (unchanged)
-
-```bash
+```powershell
+cd c:\Users\micha\Desktop\systemization-app
 npm run dev
 ```
 
-Frontend: http://localhost:5173  
-API: http://127.0.0.1:8020/api/health
+Open **http://localhost:5173** — fastest option while you're still building features.
+
+---
+
+## Helper script
+
+After Render is live, run from project root:
+
+```powershell
+.\scripts\setup-live.ps1
+```
+
+Paste your Render URL — it tests the API and prints the exact GitHub variable to set.

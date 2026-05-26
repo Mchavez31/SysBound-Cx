@@ -1,10 +1,12 @@
-# Render Blueprint — deploy backend API + PostgreSQL
-# Docs: https://render.com/docs/blueprint-spec
+# Render Blueprint — FREE tier (no credit card required)
+# Docs: https://render.com/docs/free
 services:
   - type: web
     name: sysbound-cx-api
     runtime: python
+    plan: free
     rootDir: backend
+    healthCheckPath: /api/health
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
