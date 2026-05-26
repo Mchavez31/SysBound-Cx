@@ -2,15 +2,11 @@
 
 Multi-project engineering drawing commissioning and systemization tool.
 
-### GitHub Pages vs this README
+> **Note:** SysBound Cx is currently a local development application. There is no public live demo URL yet. Clone the repo and run locally (see setup below), or view the project on the [MRC Portfolio](https://mrc-portfolio.vercel.app).
 
-The page on **github.com/yourname/sysbound-cx** is the **repository** — it always shows this `README.md` below the file list. That is normal.
+### Repository vs live app
 
-The **deployed React app** is a separate URL:
-
-**`https://yourname.github.io/sysbound-cx/`**
-
-(Replace `yourname` with your GitHub username.) After each push, wait for **Actions → Deploy to GitHub Pages** to finish (green). If the first deploy waits for approval, open **Settings → Environments → github-pages** and approve.
+This GitHub page shows the **source code** and README. The app itself runs locally during development (frontend + API). A public deployment may be added later.
 
 ---
 
