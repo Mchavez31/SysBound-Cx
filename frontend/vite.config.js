@@ -18,9 +18,9 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiTarget,
           changeOrigin: true,
-          // Long compares + progress polls must not hit Node proxy default limits
-          timeout: 180000,
-          proxyTimeout: 180000,
+          // Long compares + progress polls + tag reports must not hit Node proxy default limits
+          timeout: 900000,  // 15 minutes
+          proxyTimeout: 900000,  // 15 minutes
         },
       },
     },

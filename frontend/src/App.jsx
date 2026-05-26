@@ -10,6 +10,8 @@ import PalettesPage from './pages/PalettesPage'
 import SubsystemsPage from './pages/SubsystemsPage'
 import DrawingsPage from './pages/DrawingsPage'
 import ComparisonPage from './pages/ComparisonPage'
+import TagTrainingPage from './pages/TagTrainingPage'
+import TagReportPage from './pages/TagReportPage'
 
 function RequireAuth({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -31,6 +33,8 @@ export default function App() {
         <Route path="palettes" element={<PalettesPage />} />
         <Route path="subsystems" element={<SubsystemsPage />} />
         <Route path="drawings" element={<DrawingsPage />} />
+        <Route path="tag-training" element={<TagTrainingPage />} />
+        <Route path="tag-report" element={<TagReportPage />} />
         <Route path="comparison/:comparisonId" element={<ComparisonPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/projects" replace />} />

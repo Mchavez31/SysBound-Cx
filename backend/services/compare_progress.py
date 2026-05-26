@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 from typing import Any, Callable
 
 _lock = threading.Lock()
@@ -37,12 +38,41 @@ def _persist_progress_row(comparison_id: str, percent: int, message: str) -> Non
 
 def set_progress(comparison_id: str, percent: int, message: str = "") -> None:
     p = max(0, min(100, int(percent)))
+    now = time.time()
     with _lock:
         cur = _state.get(comparison_id, {})
+        # Track start time on first progress update
+        if "start_time" not in cur:
+            cur["start_time"] = now
+        start_time = cur.get("start_time", now)
         msg = message or cur.get("message", "")
-        cur.update({"percent": p, "message": msg, "done": False, "error": None})
+        
+        # Calculate ETA with smoothing to handle non-linear progress
+        eta_msg = ""
+        if p > 10 and p < 95:  # Only show ETA in meaningful range
+            elapsed = now - start_time
+            # Use previous ETA estimates to smooth out jumps
+            prev_eta = cur.get("last_eta", None)
+            estimated_total = (elapsed / p) * 100
+            remaining = estimated_total - elapsed
+            
+            # Smooth the estimate with previous value (70% old, 30% new)
+            if prev_eta is not None and remaining > 0:
+                remaining = prev_eta * 0.7 + remaining * 0.3
+            
+            if remaining > 0:
+                cur["last_eta"] = remaining
+                mins = int(remaining / 60)
+                secs = int(remaining % 60)
+                if mins > 0:
+                    eta_msg = f" (ETA: {mins}m {secs}s)"
+                else:
+                    eta_msg = f" (ETA: {secs}s)"
+        
+        full_msg = msg + eta_msg
+        cur.update({"percent": p, "message": full_msg, "done": False, "error": None})
         _state[comparison_id] = cur
-    _persist_progress_row(comparison_id, p, msg)
+    _persist_progress_row(comparison_id, p, full_msg)
 
 
 def mark_done(comparison_id: str) -> None:

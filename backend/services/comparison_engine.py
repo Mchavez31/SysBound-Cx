@@ -80,10 +80,79 @@ def compare_systemized_vs_systemized(
     drawing_number_a: str,
     drawing_number_b: str,
     progress_cb: ProgressCb = None,
+    tag_exclude_normalized: frozenset[str] | None = None,
 ) -> dict[str, Any]:
     """
     Compare two systemized PDFs by subsystem assignment per tag (not raw tag equality).
     """
+    # Load color palette for this project to map colors to subsystems
+    from database_connection import SessionLocal
+    from models.database import ColorPalette
+    
+    color_to_subsystem = {}
+    try:
+        with SessionLocal() as db:
+            palettes = db.query(ColorPalette).filter(ColorPalette.project_id == project_id).all()
+            for p in palettes:
+                if p.hex_color:
+                    color_to_subsystem[p.hex_color.upper()] = p.subsystem_number
+            import logging
+            logging.warning(f"Loaded {len(color_to_subsystem)} color-to-subsystem mappings from palette")
+    except Exception as e:
+        import logging
+        logging.warning(f"Could not load color palette: {e}")
+    
+    def _hex_to_rgb(hex_color: str) -> tuple[int, int, int] | None:
+        """Convert hex color to RGB tuple."""
+        if not hex_color:
+            return None
+        h = hex_color.lstrip('#').upper()
+        if len(h) != 6:
+            return None
+        try:
+            return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+        except:
+            return None
+    
+    def _color_distance(rgb1: tuple[int, int, int], rgb2: tuple[int, int, int]) -> float:
+        """Calculate Euclidean distance between two RGB colors."""
+        return ((rgb1[0] - rgb2[0]) ** 2 + (rgb1[1] - rgb2[1]) ** 2 + (rgb1[2] - rgb2[2]) ** 2) ** 0.5
+    
+    def _subsystem_from_color(hex_color: str | None, tolerance: int = 30) -> tuple[str | None, float | None, str | None]:
+        """
+        Look up subsystem from color using the project's color palette with fuzzy matching.
+        Returns: (subsystem, distance, matched_color)
+        """
+        if not hex_color or not color_to_subsystem:
+            return (None, None, None)
+        
+        # Try exact match first
+        normalized = hex_color.upper().lstrip('#')
+        if not normalized.startswith('#'):
+            normalized = '#' + normalized
+        if normalized in color_to_subsystem:
+            return (color_to_subsystem[normalized], 0.0, normalized)
+        
+        # Fuzzy match - find closest color within tolerance
+        tag_rgb = _hex_to_rgb(hex_color)
+        if not tag_rgb:
+            return (None, None, None)
+        
+        best_match = None
+        best_distance = float('inf')
+        best_color = None
+        
+        for palette_color, subsystem in color_to_subsystem.items():
+            palette_rgb = _hex_to_rgb(palette_color)
+            if palette_rgb:
+                dist = _color_distance(tag_rgb, palette_rgb)
+                if dist < best_distance and dist <= tolerance:
+                    best_distance = dist
+                    best_match = subsystem
+                    best_color = palette_color
+        
+        return (best_match, best_distance if best_match else None, best_color)
+    
     if progress_cb:
         progress_cb(2, "Reading drawings (parallel)…")
 
@@ -98,8 +167,9 @@ def compare_systemized_vs_systemized(
             frac = (clamped - lo) / span
             with prog_lock:
                 completion[side] = max(completion[side], min(1.0, frac))
-                overall = 3 + int(22 * (completion["a"] + completion["b"]) / 2)
-                overall = min(27, max(3, overall))
+                # Weighted progress: extraction is 85% of work, comparison is 15%
+                overall = 3 + int(82 * (completion["a"] + completion["b"]) / 2)
+                overall = min(85, max(3, overall))
                 if progress_cb:
                     progress_cb(overall, msg)
 
@@ -109,18 +179,20 @@ def compare_systemized_vs_systemized(
         fut_a = pool.submit(
             pdf_parser.extract_all,
             path_a,
-            progress_cb=_wrap_progress("a", 3, 17),
+            progress_cb=_wrap_progress("a", 3, 45),
             progress_lo=3,
-            progress_hi=17,
+            progress_hi=45,
             progress_label="Drawing A",
+            tag_exclude_normalized=tag_exclude_normalized,
         )
         fut_b = pool.submit(
             pdf_parser.extract_all,
             path_b,
-            progress_cb=_wrap_progress("b", 19, 27),
-            progress_lo=19,
-            progress_hi=27,
+            progress_cb=_wrap_progress("b", 45, 85),
+            progress_lo=45,
+            progress_hi=85,
             progress_label="Drawing B",
+            tag_exclude_normalized=tag_exclude_normalized,
         )
         result_a = fut_a.result()
         result_b = fut_b.result()
@@ -139,9 +211,9 @@ def compare_systemized_vs_systemized(
     sorted_nums = sorted(all_nums)
     n_tag = len(sorted_nums)
     for i, tn in enumerate(sorted_nums):
-        if progress_cb and n_tag > 0 and (i == 0 or i == n_tag - 1 or i % max(1, n_tag // 25) == 0):
-            p = 28 + int(62 * i / max(n_tag, 1))
-            progress_cb(min(90, p), f"Comparing tags ({i + 1}/{n_tag})…")
+        if progress_cb and n_tag > 0 and (i == 0 or i == n_tag - 1 or i % max(1, n_tag // 50) == 0):
+            p = 86 + int(12 * i / max(n_tag, 1))
+            progress_cb(min(98, p), f"Comparing tags ({i + 1}/{n_tag})…")
         in_a = tn in tags_a
         in_b = tn in tags_b
         ta = tags_a.get(tn)
@@ -202,14 +274,68 @@ def compare_systemized_vs_systemized(
         sub_b = _norm_sub(tb.get("nearest_subsystem"))
         col_a = _norm_hex(ta.get("nearest_subsystem_color"))
         col_b = _norm_hex(tb.get("nearest_subsystem_color"))
+        
+        # ALSO compare actual tag bubble fill colors (not just nearest label colors)
+        # This catches cases where tag bubble color changed but tag didn't move near a different label
+        tag_color_a = _norm_hex(ta.get("tag_fill_color"))
+        tag_color_b = _norm_hex(tb.get("tag_fill_color"))
+        
+        # NEW: Use color palette to determine subsystem from actual tag color
+        # This is more reliable than spatial label matching
+        # Returns: (subsystem, distance, matched_palette_color)
+        sub_from_color_a_result = _subsystem_from_color(tag_color_a)
+        sub_from_color_b_result = _subsystem_from_color(tag_color_b)
+        
+        sub_from_color_a = sub_from_color_a_result[0]
+        sub_from_color_b = sub_from_color_b_result[0]
+        color_distance_a = sub_from_color_a_result[1]
+        color_distance_b = sub_from_color_b_result[1]
+        matched_palette_color_a = sub_from_color_a_result[2]
+        matched_palette_color_b = sub_from_color_b_result[2]
+        
+        # Prefer palette-based subsystem if available, otherwise fall back to label-based
+        final_sub_a = sub_from_color_a if sub_from_color_a else sub_a
+        final_sub_b = sub_from_color_b if sub_from_color_b else sub_b
+        
         is_x = bool(ta.get("is_x_tag") or tb.get("is_x_tag"))
 
-        if sub_a != sub_b:
+        # Debug logging for color detection
+        if tn in ["S-98840", "S-98841", "S-98842", "V-98815", "XV-9881521", "XV-9881523"]:
+            import logging
+            dist_a_str = f"{color_distance_a:.1f}" if color_distance_a is not None else "N/A"
+            dist_b_str = f"{color_distance_b:.1f}" if color_distance_b is not None else "N/A"
+            logging.warning(f"DEBUG {tn}:")
+            logging.warning(f"  Label-based: sub_a={sub_a}, sub_b={sub_b}, col_a={col_a}, col_b={col_b}")
+            logging.warning(f"  Tag bubble: tag_color_a={tag_color_a}, tag_color_b={tag_color_b}")
+            logging.warning(f"  Palette fuzzy match:")
+            logging.warning(f"    A: {tag_color_a} → {matched_palette_color_a} (dist={dist_a_str}) = {sub_from_color_a}")
+            logging.warning(f"    B: {tag_color_b} → {matched_palette_color_b} (dist={dist_b_str}) = {sub_from_color_b}")
+            logging.warning(f"  Final subsystems: final_sub_a={final_sub_a}, final_sub_b={final_sub_b}")
+
+        # Treat color changes as subsystem changes (color is part of subsystem definition)
+        # Check BOTH label-based colors AND actual tag bubble colors
+        sub_changed = final_sub_a != final_sub_b  # Use palette-based subsystems
+        label_color_changed = col_a != col_b
+        bubble_color_changed = tag_color_a != tag_color_b and tag_color_a is not None and tag_color_b is not None
+        
+        # More debug logging
+        if tn in ["S-98840", "S-98841", "S-98842", "V-98815", "XV-9881521", "XV-9881523"]:
+            import logging
+            logging.warning(f"  Comparison checks:")
+            logging.warning(f"    sub_changed={sub_changed} ({final_sub_a} != {final_sub_b})")
+            logging.warning(f"    label_color_changed={label_color_changed} ({col_a} != {col_b})")
+            logging.warning(f"    bubble_color_changed={bubble_color_changed} ({tag_color_a} != {tag_color_b})")
+            logging.warning(f"    Final: sub_changed={sub_changed} or label_color_changed={label_color_changed} or bubble_color_changed={bubble_color_changed}")
+        
+        if sub_changed or label_color_changed or bubble_color_changed:
             ct = "subsystem_changed"
-        elif col_a != col_b:
-            ct = "color_changed"
         else:
+            # Both have no subsystem (None, None) OR exact same subsystem+color
             ct = "unchanged"
+        
+        if tn in ["S-98840", "S-98841", "S-98842", "V-98815", "XV-9881521", "XV-9881523"]:
+            import logging
+            logging.warning(f"    Result: ct={ct}")
 
         if ct == "unchanged":
             unchanged_count += 1
@@ -223,10 +349,12 @@ def compare_systemized_vs_systemized(
                 "tag_type": ta.get("tag_type") or tb.get("tag_type") or "other",
                 "change_type": ct,
                 "action_needed": action,
-                "subsystem_a": sub_a,
-                "subsystem_b": sub_b,
-                "color_a": col_a,
-                "color_b": col_b,
+                "subsystem_a": final_sub_a,  # Use palette-based subsystem
+                "subsystem_b": final_sub_b,  # Use palette-based subsystem  
+                "color_a": col_a or tag_color_a,  # Use label color if available, else tag bubble color
+                "color_b": col_b or tag_color_b,
+                "tag_bubble_color_a": tag_color_a,  # Store actual bubble colors too
+                "tag_bubble_color_b": tag_color_b,
                 "drawing_side": "both",
                 "page_a": ta.get("page_number"),
                 "page_b": tb.get("page_number"),
@@ -241,10 +369,25 @@ def compare_systemized_vs_systemized(
         )
 
     if progress_cb:
-        progress_cb(92, "Building summary…")
+        progress_cb(99, "Building summary…")
 
     subsystem_changed = sum(1 for r in rows if r["change_type"] == "subsystem_changed")
     color_changed = sum(1 for r in rows if r["change_type"] == "color_changed")
+
+    # Debug: count tags with/without subsystem assignments
+    tags_with_sub_a = sum(1 for t in tags_a.values() if t.get("nearest_subsystem"))
+    tags_with_sub_b = sum(1 for t in tags_b.values() if t.get("nearest_subsystem"))
+    tags_with_color_a = sum(1 for t in tags_a.values() if t.get("nearest_subsystem_color"))
+    tags_with_color_b = sum(1 for t in tags_b.values() if t.get("nearest_subsystem_color"))
+    
+    import logging
+    logging.warning(f"COMPARISON DEBUG:")
+    logging.warning(f"  Tags A: {len(tags_a)}, with subsystem: {tags_with_sub_a}, with color: {tags_with_color_a}")
+    logging.warning(f"  Tags B: {len(tags_b)}, with subsystem: {tags_with_sub_b}, with color: {tags_with_color_b}")
+    logging.warning(f"  Labels found A: {result_a.get('label_count', 0)}, B: {result_b.get('label_count', 0)}")
+    logging.warning(f"  Changes detected: {subsystem_changed}, Unchanged: {unchanged_count}")
+    logging.warning(f"  Sample tags A (first 5): {list(tags_a.keys())[:5]}")
+    logging.warning(f"  Sample tags B (first 5): {list(tags_b.keys())[:5]}")
 
     summary = {
         "total_new": sum(1 for r in rows if r["change_type"] == "new"),
@@ -256,6 +399,10 @@ def compare_systemized_vs_systemized(
         "total_tags_a": len(tags_a),
         "total_tags_b": len(tags_b),
         "total_x_tags": sum(1 for r in rows if r.get("is_x_tag")),
+        "tags_with_subsystem_a": tags_with_sub_a,
+        "tags_with_subsystem_b": tags_with_sub_b,
+        "tags_with_color_a": tags_with_color_a,
+        "tags_with_color_b": tags_with_color_b,
     }
 
     debug = {
@@ -296,6 +443,7 @@ def compare_drawings(
     drawing_number_a: str,
     drawing_number_b: str,
     progress_cb: ProgressCb = None,
+    tag_exclude_normalized: frozenset[str] | None = None,
 ) -> dict[str, Any]:
     if comparison_type == "systemized_vs_systemized":
         return compare_systemized_vs_systemized(
@@ -307,14 +455,21 @@ def compare_drawings(
             drawing_number_a,
             drawing_number_b,
             progress_cb=progress_cb,
+            tag_exclude_normalized=tag_exclude_normalized,
         )
 
     if progress_cb:
         progress_cb(5, "Extracting tags from drawing A…")
-    tags_a = pdf_parser.extract_tags(drawing_a_path)
+    tags_a = pdf_parser.extract_tags(
+        drawing_a_path,
+        tag_exclude_normalized=tag_exclude_normalized,
+    )
     if progress_cb:
         progress_cb(22, "Extracting tags from drawing B…")
-    tags_b = pdf_parser.extract_tags(drawing_b_path)
+    tags_b = pdf_parser.extract_tags(
+        drawing_b_path,
+        tag_exclude_normalized=tag_exclude_normalized,
+    )
 
     sys_a = role_a in ("current_systemized", "prior_systemized")
     sys_b = role_b in ("current_systemized", "prior_systemized")

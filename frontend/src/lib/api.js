@@ -139,10 +139,15 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+function _isAuthCredentialRequest(err) {
+  const rel = String(err.config?.url || '')
+  return rel.includes('/auth/login') || rel.includes('/auth/register')
+}
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 && !_isAuthCredentialRequest(err)) {
       localStorage.removeItem('auth-storage')
       window.location.href = `${appBasePath()}login`
     }

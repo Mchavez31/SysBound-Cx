@@ -1,10 +1,16 @@
+from pathlib import Path
+
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from models.database import Base
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# Uvicorn is started with cwd=`backend`; still load repo-root `.env` (parent of backend).
+_backend_dir = Path(__file__).resolve().parent
+_repo_root = _backend_dir.parent
+load_dotenv(_repo_root / ".env")
+load_dotenv(_backend_dir / ".env")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./systemization.db")
 

@@ -5,6 +5,12 @@ from sqlalchemy import inspect, text
 def migrate_sqlite(engine) -> None:
     if "sqlite" not in str(engine.url):
         return
+
+    import models.database  # noqa: F401 — register ORM subclasses before creating missing tables
+    from models.database import Base
+
+    Base.metadata.create_all(bind=engine)
+
     insp = inspect(engine)
     tables = insp.get_table_names()
 
@@ -52,5 +58,13 @@ def migrate_sqlite(engine) -> None:
         [
             ("progress_percent", "INTEGER DEFAULT 0"),
             ("progress_message", "VARCHAR DEFAULT ''"),
+        ],
+    )
+    insp = inspect(engine)
+    add_columns(
+        "tag_reports",
+        [
+            ("filtered_tags_count", "INTEGER DEFAULT 0"),
+            ("filtered_tags_json", "TEXT"),
         ],
     )

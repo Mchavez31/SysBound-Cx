@@ -1,14 +1,14 @@
-# Systemize
+# SysBound Cx
 
-Multi-project engineering drawing systemization tool.
+Multi-project engineering drawing commissioning and systemization tool.
 
 ### GitHub Pages vs this README
 
-The page on **github.com/yourname/Systemize** is the **repository** — it always shows this `README.md` below the file list. That is normal.
+The page on **github.com/yourname/sysbound-cx** is the **repository** — it always shows this `README.md` below the file list. That is normal.
 
 The **deployed React app** is a separate URL:
 
-**`https://yourname.github.io/Systemize/`**
+**`https://yourname.github.io/sysbound-cx/`**
 
 (Replace `yourname` with your GitHub username.) After each push, wait for **Actions → Deploy to GitHub Pages** to finish (green). If the first deploy waits for approval, open **Settings → Environments → github-pages** and approve.
 
@@ -82,7 +82,7 @@ The app is now running at http://localhost:5173
 git init
 git add .
 git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/systemization-app.git
+git remote add origin https://github.com/YOUR_USERNAME/sysbound-cx.git
 git push -u origin main
 ```
 
@@ -127,7 +127,7 @@ After both are deployed, update the backend's CORS to allow your frontend URL:
 ## Project structure
 
 ```
-Systemize/
+sysbound-cx/
 ├── backend/
 │   ├── main.py                 # FastAPI app entry point
 │   ├── database_connection.py  # DB setup

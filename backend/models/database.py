@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, ForeignKey, Text, JSON
+from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, ForeignKey, Text, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship, DeclarativeBase
 from sqlalchemy.sql import func
 import uuid
@@ -33,6 +33,32 @@ class Project(Base):
     subsystems = relationship("Subsystem", back_populates="project")
     color_palettes = relationship("ColorPalette", back_populates="project")
     comparisons = relationship("Comparison", back_populates="project")
+    reference_documents = relationship("ProjectReferenceDocument", back_populates="project")
+    tag_verdicts = relationship("ProjectTagVerdict", back_populates="project")
+
+class ProjectReferenceDocument(Base):
+    """
+    Project tagging spec / supplemental documents. Files persist on disk until the user removes them.
+    """
+    __tablename__ = "project_reference_documents"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    doc_role = Column(String, nullable=False)  # tagging_spec | supplemental
+    file_path = Column(String, nullable=False)
+    original_filename = Column(String, nullable=False)
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    project = relationship("Project", back_populates="reference_documents")
+
+class ProjectTagVerdict(Base):
+    """Training labels for tag strings — invalid verdicts suppress extraction on future comparisons."""
+    __tablename__ = "project_tag_verdicts"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    tag_normalized = Column(String, nullable=False)
+    verdict = Column(String, nullable=False)  # valid | invalid
+    updated_at = Column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = (UniqueConstraint("project_id", "tag_normalized", name="uq_project_tag_verdict"),)
+    project = relationship("Project", back_populates="tag_verdicts")
 
 class ProjectMember(Base):
     __tablename__ = "project_members"
@@ -173,6 +199,33 @@ class TagHistory(Base):
     change_reason = Column(Text)
     changed_at = Column(DateTime(timezone=True), server_default=func.now())
     tag = relationship("Tag", back_populates="history")
+
+class TagReport(Base):
+    """Saved tag extraction reports with Excel exports."""
+    __tablename__ = "tag_reports"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    drawing_id = Column(String, ForeignKey("drawings.id"), nullable=False)
+    report_file_path = Column(String, nullable=False)  # Path to saved Excel file
+    drawing_number = Column(String)
+    total_tags = Column(Integer)
+    filtered_tags_count = Column(Integer, default=0)  # Count of filtered/rejected tags
+    filtered_tags_json = Column(Text)  # JSON array of filtered tags with reasons
+    total_pages = Column(Integer)
+    generated_at = Column(DateTime(timezone=True), server_default=func.now())
+    generated_by = Column(String, ForeignKey("users.id"))
+
+
+class ValidatedTag(Base):
+    """User-validated tags that should bypass automatic filtering."""
+    __tablename__ = "validated_tags"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    tag_number = Column(String, nullable=False)  # The validated tag
+    tag_type = Column(String)  # User-specified tag type
+    validated_by = Column(String, ForeignKey("users.id"))
+    validated_at = Column(DateTime(timezone=True), server_default=func.now())
+    notes = Column(Text)  # Optional user notes about why this tag is valid
 
 class SystemizationRule(Base):
     __tablename__ = "systemization_rules"

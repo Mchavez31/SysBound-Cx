@@ -6,6 +6,8 @@ import api from '../lib/api'
 
 const NAV_ITEMS = [
   { to: '', label: 'Dashboard', end: true, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> },
+  { to: 'tag-training', label: 'Tags & specs', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg> },
+  { to: 'tag-report', label: 'Tag Reports', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> },
   { to: 'drawings', label: 'Drawings', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
   { to: 'palettes', label: 'Color Palettes', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> },
   { to: 'subsystems', label: 'Subsystems', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> },
@@ -26,32 +28,32 @@ export default function ProjectLayout() {
   })
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
       {/* Sidebar */}
-      <div style={{ width: 228, background: '#1a2744', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <div style={{ width: 228, background: 'var(--bg-surface)', display: 'flex', flexDirection: 'column', flexShrink: 0, boxShadow: '4px 0 20px rgba(0,0,0,0.5)', borderRight: '1px solid var(--border-mid)' }}>
         {/* App logo */}
-        <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid var(--border-dim)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <div style={{ width: 28, height: 28, background: 'rgba(255,255,255,0.12)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+            <div style={{ width: 28, height: 28, background: 'var(--teal-dim)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-bright)' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal-bright)" strokeWidth="2" strokeLinecap="round">
                 <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
                 <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
               </svg>
             </div>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>Systemization</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>SysBound Cx</span>
           </div>
           {/* Project switcher button */}
           <button
             onClick={() => navigate('/projects')}
-            style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '8px 10px', color: 'white', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'background 0.15s', textAlign: 'left' }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.14)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+            style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-mid)', borderRadius: 8, padding: '8px 10px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--teal-dim)'; e.currentTarget.style.borderColor = 'var(--border-bright)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border-mid)' }}
           >
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{project?.name || 'Loading…'}</div>
-              {project?.client && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 1 }}>{project.client}</div>}
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--teal-bright)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{project?.name || 'Loading…'}</div>
+              {project?.client && <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>{project.client}</div>}
             </div>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2.5" strokeLinecap="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
@@ -67,13 +69,14 @@ export default function ProjectLayout() {
               style={({ isActive }) => ({
                 display: 'flex', alignItems: 'center', gap: 9,
                 padding: '8px 10px', borderRadius: 7, marginBottom: 2,
-                color: isActive ? 'white' : 'rgba(255,255,255,0.55)',
-                background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                fontWeight: isActive ? 500 : 400, fontSize: 13,
-                textDecoration: 'none', transition: 'all 0.12s',
+                color: isActive ? 'var(--teal-bright)' : 'var(--text-secondary)',
+                background: isActive ? 'var(--teal-dim)' : 'transparent',
+                fontWeight: isActive ? 600 : 400, fontSize: 13,
+                textDecoration: 'none', transition: 'all 0.2s',
+                border: isActive ? '1px solid var(--border-bright)' : '1px solid transparent',
               })}
-              onMouseEnter={(e) => { if (!e.currentTarget.classList.contains('active')) e.currentTarget.style.background = 'rgba(255,255,255,0.07)' }}
-              onMouseLeave={(e) => { if (!e.currentTarget.classList.contains('active')) e.currentTarget.style.background = 'transparent' }}
+              onMouseEnter={(e) => { if (!e.currentTarget.classList.contains('active')) { e.currentTarget.style.background = 'rgba(20,184,166,0.06)'; e.currentTarget.style.borderColor = 'var(--border-mid)' } }}
+              onMouseLeave={(e) => { if (!e.currentTarget.classList.contains('active')) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' } }}
             >
               {icon} {label}
             </NavLink>
@@ -83,10 +86,11 @@ export default function ProjectLayout() {
             style={({ isActive }) => ({
               display: 'flex', alignItems: 'center', gap: 9,
               padding: '8px 10px', borderRadius: 7, marginBottom: 2,
-              color: isActive ? 'white' : 'rgba(255,255,255,0.55)',
-              background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-              fontWeight: isActive ? 500 : 400, fontSize: 13,
-              textDecoration: 'none', transition: 'all 0.12s',
+              color: isActive ? 'var(--teal-bright)' : 'var(--text-secondary)',
+              background: isActive ? 'var(--teal-dim)' : 'transparent',
+              fontWeight: isActive ? 600 : 400, fontSize: 13,
+              textDecoration: 'none', transition: 'all 0.2s',
+              border: isActive ? '1px solid var(--border-bright)' : '1px solid transparent',
             })}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11H5a2 2 0 01-2-2V5a2 2 0 012-2h4M15 13h4a2 2 0 002-2V5a2 2 0 00-2-2h-4M9 11V9a2 2 0 012-2h2a2 2 0 012 2v2M9 11v6a2 2 0 002 2h2a2 2 0 002-2v-6"/></svg>
@@ -95,16 +99,19 @@ export default function ProjectLayout() {
         </nav>
 
         {/* User footer */}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-dim)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, background: '#2563eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'white', flexShrink: 0 }}>
+            <div style={{ width: 28, height: 28, background: 'var(--teal-dim)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--teal-bright)', flexShrink: 0, border: '2px solid var(--border-bright)' }}>
               {user?.name?.charAt(0).toUpperCase()}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--teal-bright)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
             </div>
-            <button onClick={logout} title="Sign out" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', padding: 4, display: 'flex' }}>
+            <button onClick={logout} title="Sign out" style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', opacity: 0.6, padding: 4, display: 'flex', cursor: 'pointer', transition: 'opacity 0.2s' }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
               </svg>
@@ -114,7 +121,7 @@ export default function ProjectLayout() {
       </div>
 
       {/* Main content */}
-      <div style={{ flex: 1, overflow: 'auto', background: '#f3f4f6' }}>
+      <div style={{ flex: 1, overflow: 'auto', background: 'var(--bg-base)' }}>
         <Outlet />
       </div>
     </div>

@@ -29,20 +29,22 @@ const TIP_COLOR =
 function MissingHint({ value, tip, as = '—' }) {
   if (value != null && value !== '') return value
   return (
-    <span title={tip} style={{ cursor: 'help', borderBottom: '1px dotted #cbd5e1' }}>
+    <span title={tip} style={{ cursor: 'help', borderBottom: '1px dotted var(--border-mid)', color: 'var(--text-dim)' }}>
       {as}
     </span>
   )
 }
 
-function rowStyle(row) {
+function rowStyle(row, idx) {
   const ct = row.change_type
-  if (ct === 'new') return { background: '#fffbeb' }
-  if (ct === 'removed') return { background: '#fef2f2' }
-  if (ct === 'subsystem_changed' || ct === 'color_changed') return { background: '#eff6ff' }
-  if (row.is_x_tag) return { background: '#e0f2fe' }
-  if (row.action_needed === 'future') return { background: '#f3f4f6' }
-  return {}
+  const baseStyle = idx % 2 === 0 ? { background: 'var(--bg-card)' } : { background: 'rgba(20,184,166,0.03)' }
+  
+  if (ct === 'new') return { ...baseStyle, borderLeft: '3px solid var(--amber)' }
+  if (ct === 'removed') return { ...baseStyle, borderLeft: '3px solid var(--red)' }
+  if (ct === 'subsystem_changed' || ct === 'color_changed') return { ...baseStyle, borderLeft: '3px solid var(--blue)' }
+  if (row.is_x_tag) return { ...baseStyle, borderLeft: '3px solid var(--teal)' }
+  if (row.action_needed === 'future') return { ...baseStyle, opacity: 0.7 }
+  return baseStyle
 }
 
 function ActionBadge({ action }) {
@@ -125,9 +127,10 @@ function ChangeTypeFilterDropdown({ value, onToggle, onClear }) {
           textAlign: 'left',
           padding: '8px 10px',
           fontSize: 14,
-          border: '1px solid #d1d5db',
+          border: '1px solid var(--border-mid)',
           borderRadius: 6,
-          background: '#fff',
+          background: 'var(--bg-elevated)',
+          color: 'var(--text-primary)',
           cursor: 'pointer',
           display: 'flex',
           justifyContent: 'space-between',
@@ -138,7 +141,7 @@ function ChangeTypeFilterDropdown({ value, onToggle, onClear }) {
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{changeTypeFilterLabel(value)}</span>
-        <span style={{ color: '#6b7280', fontSize: 12, flexShrink: 0 }}>{open ? '▲' : '▼'}</span>
+        <span style={{ color: 'var(--text-dim)', fontSize: 12, flexShrink: 0 }}>{open ? '▲' : '▼'}</span>
       </button>
       {open && (
         <div
@@ -150,10 +153,10 @@ function ChangeTypeFilterDropdown({ value, onToggle, onClear }) {
             right: 0,
             top: 'calc(100% + 4px)',
             zIndex: 200,
-            background: '#fff',
-            border: '1px solid #e5e7eb',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-mid)',
             borderRadius: 8,
-            boxShadow: '0 10px 25px rgba(15,23,42,0.12)',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
             padding: '6px 0',
             maxHeight: 280,
             overflowY: 'auto',
@@ -176,6 +179,7 @@ function ChangeTypeFilterDropdown({ value, onToggle, onClear }) {
                 margin: 0,
                 textTransform: 'none',
                 fontWeight: 400,
+                color: 'var(--text-primary)',
               }}
             >
               <span
@@ -197,10 +201,10 @@ function ChangeTypeFilterDropdown({ value, onToggle, onClear }) {
               <span style={{ flex: 1, minWidth: 0, lineHeight: 1.3 }}>{opt.label}</span>
             </label>
           ))}
-          <div style={{ borderTop: '1px solid #f3f4f6', marginTop: 4, padding: '8px 14px 6px' }}>
+          <div style={{ borderTop: '1px solid var(--border-dim)', marginTop: 4, padding: '8px 14px 6px' }}>
             <button
               type="button"
-              className="sm"
+              className="sm secondary"
               style={{ width: '100%' }}
               onClick={() => {
                 onClear()
@@ -283,7 +287,7 @@ function ZoomableSnippetPanel({
         minHeight: 0,
         flex: 1,
         height: '100%',
-        background: '#0f172a',
+        background: 'var(--bg-base)',
       }}
     >
       <div
@@ -291,8 +295,8 @@ function ZoomableSnippetPanel({
           fontSize: 11,
           fontWeight: 600,
           padding: '6px 10px',
-          background: '#1e293b',
-          color: '#e2e8f0',
+          background: 'var(--bg-surface)',
+          color: 'var(--text-primary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -309,9 +313,9 @@ function ZoomableSnippetPanel({
               title="Zoomed crop around the tag"
               onClick={() => onViewModeChange('focus')}
               style={{
-                background: viewMode === 'focus' ? '#334155' : 'transparent',
-                color: viewMode === 'focus' ? '#f8fafc' : '#94a3b8',
-                border: '1px solid #475569',
+                background: viewMode === 'focus' ? 'var(--teal)' : 'transparent',
+                color: viewMode === 'focus' ? 'var(--bg-base)' : 'var(--text-secondary)',
+                border: '1px solid var(--border-mid)',
               }}
             >
               Tag region
@@ -322,9 +326,9 @@ function ZoomableSnippetPanel({
               title="Whole PDF page (pan to see everything)"
               onClick={() => onViewModeChange('full')}
               style={{
-                background: viewMode === 'full' ? '#334155' : 'transparent',
-                color: viewMode === 'full' ? '#f8fafc' : '#94a3b8',
-                border: '1px solid #475569',
+                background: viewMode === 'full' ? 'var(--teal)' : 'transparent',
+                color: viewMode === 'full' ? 'var(--bg-base)' : 'var(--text-secondary)',
+                border: '1px solid var(--border-mid)',
               }}
             >
               Full page
@@ -341,7 +345,7 @@ function ZoomableSnippetPanel({
             >
               −
             </button>
-            <span style={{ fontSize: 10, color: '#94a3b8', minWidth: 44, textAlign: 'center' }}>{Math.round(zoom * 100)}%</span>
+            <span style={{ fontSize: 10, color: 'var(--text-secondary)', minWidth: 44, textAlign: 'center' }}>{Math.round(zoom * 100)}%</span>
             <button
               type="button"
               className="sm"
@@ -396,7 +400,7 @@ function ZoomableSnippetPanel({
             }}
           />
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180, color: '#94a3b8', fontSize: 13 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180, color: 'var(--text-dim)', fontSize: 13 }}>
             {emptyLabel}
           </div>
         )}
@@ -431,6 +435,24 @@ function revokeSnippetObjectUrls(ref) {
       o[k] = null
     }
   })
+}
+
+function summarizeComparisonChange(row) {
+  if (!row) return ''
+  const ct = row.change_type
+  if (ct === 'subsystem_changed') {
+    const a = row.subsystem_a != null && row.subsystem_a !== '' ? row.subsystem_a : '—'
+    const b = row.subsystem_b != null && row.subsystem_b !== '' ? row.subsystem_b : '—'
+    return `Change found: subsystem label ${a} → ${b}`
+  }
+  if (ct === 'color_changed') {
+    const a = row.color_a || '—'
+    const b = row.color_b || '—'
+    return `Change found: bubble fill color ${a} → ${b}`
+  }
+  if (ct === 'new') return 'Change found: tag appears only on drawing B (current).'
+  if (ct === 'removed') return 'Change found: tag appears only on drawing A (prior).'
+  return ct ? `Change type: ${ct}` : ''
 }
 
 function SideBySidePdfModal({ open, onClose, projectId, row, drawingAId, drawingBId, docA, docB }) {
@@ -620,7 +642,7 @@ function SideBySidePdfModal({ open, onClose, projectId, row, drawingAId, drawing
         position: 'fixed',
         inset: 0,
         zIndex: 1000,
-        background: 'rgba(15,23,42,0.55)',
+        background: 'rgba(0,0,0,0.75)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -645,7 +667,7 @@ function SideBySidePdfModal({ open, onClose, projectId, row, drawingAId, drawing
         <div
           style={{
             padding: '12px 16px',
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: '1px solid var(--border-dim)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
@@ -654,21 +676,35 @@ function SideBySidePdfModal({ open, onClose, projectId, row, drawingAId, drawing
           }}
         >
           <div>
-            <div style={{ fontWeight: 600, fontSize: 15 }}>Tag: {row?.tag_number}</div>
-            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4, maxWidth: 720 }}>
+            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)' }}>Tag: {row?.tag_number}</div>
+            {summarizeComparisonChange(row) ? (
+              <div
+                style={{
+                  fontSize: 13,
+                  color: 'var(--teal-bright)',
+                  fontWeight: 600,
+                  marginTop: 8,
+                  maxWidth: 720,
+                  lineHeight: 1.4,
+                }}
+              >
+                {summarizeComparisonChange(row)}
+              </div>
+            ) : null}
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4, maxWidth: 720 }}>
               Use <strong>Tag region</strong> for the zoomed crop (red box when coordinates exist). Use <strong>Full page</strong> to pan the whole sheet, then zoom and drag to inspect anywhere.
             </div>
-            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>
               {docA && <span style={{ marginRight: 12 }}>A: {docA}</span>}
               {docB && <span>B: {docB}</span>}
             </div>
           </div>
-          <button type="button" className="sm" onClick={onClose}>
+          <button type="button" className="sm secondary" onClick={onClose}>
             Close
           </button>
         </div>
-        {loading && <p style={{ padding: 24 }}>Loading views…</p>}
-        {err && <p style={{ padding: '8px 16px', color: '#b91c1c', fontSize: 13, margin: 0 }}>{err}</p>}
+        {loading && <p style={{ padding: 24, color: 'var(--text-secondary)' }}>Loading views…</p>}
+        {err && <p style={{ padding: '8px 16px', color: 'var(--red)', fontSize: 13, margin: 0 }}>{err}</p>}
         {!loading && hasAnySnippet && (
           <div
             style={{
@@ -677,7 +713,7 @@ function SideBySidePdfModal({ open, onClose, projectId, row, drawingAId, drawing
               gap: 1,
               flex: 1,
               minHeight: 420,
-              background: '#e5e7eb',
+              background: 'var(--border-dim)',
             }}
           >
             <ZoomableSnippetPanel
@@ -698,7 +734,7 @@ function SideBySidePdfModal({ open, onClose, projectId, row, drawingAId, drawing
             />
           </div>
         )}
-        <p style={{ fontSize: 11, color: '#9ca3af', padding: '8px 16px', margin: 0, borderTop: '1px solid #f3f4f6' }}>
+        <p style={{ fontSize: 11, color: 'var(--text-dim)', padding: '8px 16px', margin: 0, borderTop: '1px solid var(--border-dim)' }}>
           Tag region = cropped view. Full page = entire sheet at reduced resolution — zoom and pan to review the full drawing.
         </p>
       </div>
@@ -788,7 +824,7 @@ export default function ComparisonPage() {
   if (isLoading) {
     return (
       <div style={{ padding: 40 }}>
-        <p>Loading…</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>
       </div>
     )
   }
@@ -796,13 +832,13 @@ export default function ComparisonPage() {
   if (isError) {
     return (
       <div style={{ padding: '40px 28px' }}>
-        <p style={{ fontWeight: 600, marginBottom: 8 }}>Could not load this comparison</p>
-        <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 16 }}>{formatAxiosError(queryError, 'Request failed')}</p>
+        <p style={{ fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>Could not load this comparison</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>{formatAxiosError(queryError, 'Request failed')}</p>
         <button type="button" className="accent" onClick={() => refetch()}>
           Retry
         </button>
         <div style={{ marginTop: 20 }}>
-          <Link to={`/project/${projectId}/drawings`} style={{ fontSize: 14, color: '#2563eb' }}>
+          <Link to={`/project/${projectId}/drawings`} style={{ fontSize: 14, color: 'var(--teal-bright)' }}>
             ← Back to drawings
           </Link>
         </div>
@@ -814,21 +850,20 @@ export default function ComparisonPage() {
     <div style={{ padding: '24px 28px 48px', maxWidth: 1480 }}>
       <div style={{ marginBottom: 20, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
         <div>
-          <Link to={`/project/${projectId}/drawings`} style={{ fontSize: 13, color: '#2563eb' }}>
+          <Link to={`/project/${projectId}/drawings`} style={{ fontSize: 13, color: 'var(--teal-bright)' }}>
             ← Back to drawings
           </Link>
-          <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 12 }}>Comparison results</h1>
-          <p style={{ color: '#6b7280', fontSize: 13 }}>ID: {comparisonId}</p>
+          <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 12, color: 'var(--text-primary)' }}>Comparison results</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>ID: {comparisonId}</p>
           {storedComparisonError ? (
-            <p style={{ color: '#b45309', fontSize: 13, marginTop: 10, maxWidth: 720 }}>
+            <p style={{ color: 'var(--amber)', fontSize: 13, marginTop: 10, maxWidth: 720 }}>
               Stored comparison error: {typeof storedComparisonError === 'string' ? storedComparisonError : JSON.stringify(storedComparisonError)}
             </p>
           ) : null}
         </div>
         <button
           type="button"
-          className="sm"
-          style={{ color: '#b91c1c', border: '1px solid #fecaca', background: '#fff' }}
+          className="sm danger"
           disabled={deleteComparisonMut.isPending}
           onClick={() => {
             if (!window.confirm('Delete this comparison from history? This cannot be undone.')) return
@@ -848,20 +883,20 @@ export default function ComparisonPage() {
         }}
       >
         {[
-          ['Changes listed', rows.length, '#111'],
-          ['New', summary.total_new || 0, '#b45309'],
-          ['Removed', summary.total_removed || 0, '#dc2626'],
+          ['Changes listed', rows.length, 'var(--teal-bright)'],
+          ['New', summary.total_new || 0, 'var(--amber)'],
+          ['Removed', summary.total_removed || 0, 'var(--red)'],
           ...(typeof summary.subsystem_changed === 'number'
             ? [
-                ['Subsystem changed', summary.subsystem_changed, '#1d4ed8'],
-                ['Color changed', summary.color_changed ?? 0, '#4338ca'],
+                ['Subsystem changed', summary.subsystem_changed, 'var(--blue)'],
+                ['Color changed', summary.color_changed ?? 0, 'var(--blue)'],
               ]
-            : [['Subsystem / color Δ', summary.total_subsystem_changes || 0, '#1d4ed8']]),
-          ['Unchanged (omitted)', summary.total_unchanged || 0, '#15803d'],
-          ['X-Tags', summary.total_x_tags || 0, '#0369a1'],
+            : [['Subsystem / color Δ', summary.total_subsystem_changes || 0, 'var(--blue)']]),
+          ['Unchanged (omitted)', summary.total_unchanged || 0, 'var(--green)'],
+          ['X-Tags', summary.total_x_tags || 0, 'var(--teal)'],
         ].map(([label, val, color]) => (
           <div key={label} className="card" style={{ padding: 12 }}>
-            <div style={{ fontSize: 11, color: '#6b7280', textTransform: 'uppercase' }}>{label}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-dim)', textTransform: 'uppercase' }}>{label}</div>
             <div style={{ fontSize: 22, fontWeight: 600, color }}>{val}</div>
           </div>
         ))}
@@ -920,13 +955,13 @@ export default function ComparisonPage() {
             </button>
           </div>
         </div>
-        <p style={{ fontSize: 11, color: '#9ca3af', margin: '12px 0 0', lineHeight: 1.4 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-dim)', margin: '12px 0 0', lineHeight: 1.4 }}>
           Tick one or more change types in the list, or leave all unchecked to show every type.
         </p>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <p style={{ fontSize: 12, color: '#6b7280', padding: '12px 16px 0', margin: 0, lineHeight: 1.45, maxWidth: 920 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '12px 16px 0', margin: 0, lineHeight: 1.45, maxWidth: 920 }}>
           <strong>Sub A / Sub B</strong> link subsystem bubbles by <em>color</em> (distance breaks ties). The PDF is read as
           vectors, not every pixel: we sample fills near the tag, stroke colors from nearby lines/curves (often the valve /
           line color), and avoid relying on bright red at the tag text when other samples disagree (common manual markup).
@@ -953,13 +988,13 @@ export default function ComparisonPage() {
             </thead>
             <tbody>
               {filtered.map((r, i) => (
-                <tr key={`${r.tag_number}-${i}`} style={rowStyle(r)}>
-                  <td style={{ fontWeight: 500 }}>{r.tag_number}</td>
-                  <td>{r.tag_type}</td>
-                  <td style={{ fontSize: 12, maxWidth: 140, wordBreak: 'break-all' }}>
+                <tr key={`${r.tag_number}-${i}`} style={rowStyle(r, i)}>
+                  <td style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--teal-bright)', fontWeight: 600 }}>{r.tag_number}</td>
+                  <td style={{ color: 'var(--text-primary)' }}>{r.tag_type}</td>
+                  <td style={{ fontSize: 12, maxWidth: 140, wordBreak: 'break-all', color: 'var(--text-secondary)' }}>
                     {r.drawing_number_a || docFallbackA || '—'}
                   </td>
-                  <td style={{ fontSize: 12, maxWidth: 140, wordBreak: 'break-all' }}>
+                  <td style={{ fontSize: 12, maxWidth: 140, wordBreak: 'break-all', color: 'var(--text-secondary)' }}>
                     {r.drawing_number_b || docFallbackB || '—'}
                   </td>
                   <td>
@@ -970,34 +1005,34 @@ export default function ComparisonPage() {
                   </td>
                   <td>
                     {r.color_a ? <span className="color-dot" style={{ background: r.color_a }} /> : null}{' '}
-                    <span style={{ fontSize: 11 }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'var(--text-dim)' }}>
                       {r.color_a ? r.color_a : <MissingHint value={null} tip={TIP_COLOR} />}
                     </span>
                   </td>
                   <td>
                     {r.color_b ? <span className="color-dot" style={{ background: r.color_b }} /> : null}{' '}
-                    <span style={{ fontSize: 11 }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'var(--text-dim)' }}>
                       {r.color_b ? r.color_b : <MissingHint value={null} tip={TIP_COLOR} />}
                     </span>
                   </td>
-                  <td>{r.change_type}</td>
+                  <td style={{ color: 'var(--text-primary)' }}>{r.change_type}</td>
                   <td>
                     <ActionBadge action={r.action_needed || 'none'} />
                   </td>
-                  <td>{r.page_a ?? '—'}</td>
-                  <td>{r.page_b ?? '—'}</td>
+                  <td style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-secondary)' }}>{r.page_a ?? '—'}</td>
+                  <td style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-secondary)' }}>{r.page_b ?? '—'}</td>
                   <td>
                     {canViewSideBySide(r) ? (
                       <button
                         type="button"
-                        className="sm"
-                        style={{ border: 'none', background: 'none', color: '#2563eb', cursor: 'pointer', padding: 0, fontSize: 12 }}
+                        className="sm accent"
+                        style={{ padding: '2px 8px', fontSize: 11 }}
                         onClick={() => setViewerRow(r)}
                       >
-                        View change
+                        View
                       </button>
                     ) : (
-                      <span style={{ color: '#d1d5db' }}>—</span>
+                      <span style={{ color: 'var(--text-dim)' }}>—</span>
                     )}
                   </td>
                 </tr>
@@ -1005,7 +1040,7 @@ export default function ComparisonPage() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && <p style={{ padding: 24, color: '#6b7280' }}>No rows match filters.</p>}
+        {filtered.length === 0 && <p style={{ padding: 24, color: 'var(--text-secondary)' }}>No rows match filters.</p>}
       </div>
 
       <SideBySidePdfModal

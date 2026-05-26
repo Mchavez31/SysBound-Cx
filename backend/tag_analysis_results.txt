@@ -1,0 +1,172 @@
+﻿====================================================================================================
+DETAILED ERROR ANALYSIS - TAG EXTRACTION REPORT
+====================================================================================================
+
+
+====================================================================================================
+ERROR #1: MODULE EXTRACTION FAILURE
+====================================================================================================
+
+PROBLEM: All 2497 tags show Module = 'Unknown'
+
+EXPECTED: Module should be extracted from tag number suffix or drawing metadata
+
+EXAMPLES OF WHAT'S WRONG:
+
+   Tag: SPSP-008015WGL3
+   Current Module: Unknown
+   Should be: WGL1/WGL2/WGL3/WGL4/WGL5/WGPT/WGRT (extracted from tag)
+
+
+====================================================================================================
+ERROR #2: INVALID TAGS (Drawing Metadata, Not Equipment Tags)
+====================================================================================================
+
+PROBLEM: Parser is capturing drawing metadata as tags
+
+Found 6 questionable tags
+
+EXAMPLES:
+
+   Row 0: 'SPSP-008015' (Type: SPSP)
+   [X] 'SPSP' tags need validation - may be specialty items but format is unusual
+
+   Row 1: 'SPSP-008015WGL3' (Type: SPSP)
+   [X] 'SPSP' tags need validation - may be specialty items but format is unusual
+
+   Row 2: 'WOD-00000' (Type: WOD)
+   [X] This is drawing metadata/code, NOT an equipment tag
+
+   Row 3: 'WWOC-WGXX' (Type: WWOC)
+   [X] This is drawing metadata/code, NOT an equipment tag
+
+   Row 29: 'ENT-320087' (Type: ENT)
+   [X] 'ENT'/'RENT' appears to be drawing annotation, not a tag
+
+   Row 34: 'RENT-320087' (Type: RENT)
+   [X] 'ENT'/'RENT' appears to be drawing annotation, not a tag
+
+
+====================================================================================================
+ERROR #3: TAG TYPE FORMAT INCORRECT FOR INSTRUMENTS
+====================================================================================================
+
+PROBLEM: Instrument tags should have specific 2-4 letter codes (FV, TIT, PT, PDIT, etc.)
+
+Current Tag Types found: 492 unique types
+
+EXPECTED PIMS Format:
+   - Instruments: FV, TIT, PT, PDIT, LT, FT, etc. (2-4 letters)
+   - Valves: CV, CK, etc.
+   - Piping: Use line size notation (10"-WF, 12"-DO, etc.)
+   - Specialty: SP-XXXXXX
+
+
+CURRENT TYPES DETECTED (First 30):
+    [?] A          (  12 tags)
+    [?] ABV        (   5 tags)
+    [?] AC         (   1 tags)
+    [?] ACFM       (   1 tags)
+    [?] ADED       (   1 tags)
+    [?] AELH       (   1 tags)
+    [?] AGEN       (   1 tags)
+    [?] AGMV       (   1 tags)
+    [?] AH         (   1 tags)
+    [?] AI         (  16 tags)
+    [?] AIRN       (   1 tags)
+    [?] ALARM      (   3 tags)
+    [?] ALASD      (   2 tags)
+    [?] ALC        (   3 tags)
+    [?] ALNN       (   2 tags)
+    [?] ALOW       (   1 tags)
+    [?] ALVE       (   2 tags)
+    [?] AM         (   5 tags)
+    [?] ANDLI      (   1 tags)
+    [?] ANK        (   1 tags)
+    [?] ANKU       (   1 tags)
+    [?] ANY        (   1 tags)
+    [?] AP         (  17 tags)
+    [?] ARY        (   2 tags)
+    [?] ASD        (  45 tags)
+    [?] ASDSS      (   1 tags)
+    [?] ASDW       (   1 tags)
+    [?] ASOR       (   1 tags)
+    [?] ATION      (   1 tags)
+    [?] BBLR       (   1 tags)
+
+
+====================================================================================================
+ERROR #4: TAG DESCRIPTIONS ALL MISSING
+====================================================================================================
+
+PROBLEM: All 2497 tags have NULL/empty descriptions
+
+EXPECTED: Each tag should have equipment description
+   Examples:
+   - FV-12345 -> 'CONTROL VALVE'
+   - TIT-67890 -> 'TEMPERATURE INDICATOR TRANSMITTER'
+   - 10"-WF -> 'WATER FEED LINE'
+
+
+====================================================================================================
+ERROR #5: PIPING TAG FORMAT ISSUES
+====================================================================================================
+
+Total Piping Tags: 497
+Correct format (with inch mark): 327
+Incorrect/Uncertain format: 170
+
+
+EXAMPLES OF CORRECT PIPING FORMAT:
+   [OK] 34"-PW-56002-BKP7
+   [OK] 94"-FG-62001-BWD7
+   [OK] 4"-VA-0081000-A2J3X
+   [OK] 12"-DO-3780031-A3T3P
+   [OK] 13"-WD-5780009-A3S32
+
+
+EXAMPLES OF QUESTIONABLE PIPING TAGS:
+    [?] V-37803 (Type: V) - Missing inch size notation
+    [?] V-37804 (Type: V) - Missing inch size notation
+python : Traceback (most recent call last):
+At C:\Users\micha\AppData\Local\Temp\ps-script-5799bbfb-8d80-4062-8b1c-b4928dbbc37f.ps1:78 char:1
++ python detailed_tag_analysis.py 2>&1 | Out-File -FilePath tag_analysi ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    [?] V-37805 (Type: V) - Missing inch size notation
+    [?] V-37806 (Type: V) - Missing inch size notation
+    [?] V-37807 (Type: V) - Missing inch size notation
+    [?] V-37815 (Type: V) - Missing inch size notation
+    [?] V-37801 (Type: V) - Missing inch size notation
+    [?] V-37809 (Type: V) - Missing inch size notation
+    [?] V-37802 (Type: V) - Missing inch size notation
+    [?] V-37810 (Type: V) - Missing inch size notation
+
+
+====================================================================================================
+ERROR #6: TAG TYPE PARSING FOR PIPING
+====================================================================================================
+
+PROBLEM: Piping tags should show the full line designation as 'Tag Type'
+
+EXAMPLE:
+   Tag Number: 34"-PW-56002-BKP7
+   Current Tag Type: 'PW'
+   Expected Tag Type: '34"-PW'
+
+   Tag Number: 12"-DO-3780031-A3T3P
+   Current Tag Type: 'DO'
+   Expected Tag Type: '12"-DO'
+
+
+====================================================================================================
+PRIORITY FIX LIST
+====================================================================================================
+  File "C:\Users\micha\Desktop\systemization-app\backend\detailed_tag_analysis.py", line 116, in <module>
+    print("""
+  File "C:\Users\micha\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 133: character maps to <undefined>

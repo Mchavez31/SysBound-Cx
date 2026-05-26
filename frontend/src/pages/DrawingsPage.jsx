@@ -215,16 +215,14 @@ export default function DrawingsPage() {
 
   return (
     <div style={{ padding: '28px 28px 48px', maxWidth: 1100 }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Drawings</h1>
-        <p style={{ color: '#6b7280', fontSize: 14 }}>
-          Upload PDFs, run comparisons between revisions, and export reports.
-        </p>
-      </div>
+      <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', borderBottom: '1px solid var(--border-dim)', paddingBottom: 16, marginBottom: 24 }}>Drawings</h1>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24 }}>
+        Upload PDFs, run comparisons between revisions, and export reports.
+      </p>
 
       {/* Section 1 */}
       <section className="card" style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>1. Upload PDF</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 14, color: 'var(--teal-bright)' }}>1. Upload PDF</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 16, alignItems: 'end' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label>PDF file</label>
@@ -243,7 +241,7 @@ export default function DrawingsPage() {
         </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, cursor: 'pointer' }}>
           <input type="checkbox" checked={showManual} onChange={(e) => setShowManual(e.target.checked)} />
-          <span style={{ fontSize: 13, color: '#6b7280' }}>Enter drawing number / type manually (if auto-detect failed)</span>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Enter drawing number / type manually (if auto-detect failed)</span>
         </label>
         {showManual && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
@@ -259,7 +257,7 @@ export default function DrawingsPage() {
         )}
         <button
           type="button"
-          className="primary"
+          className="accent"
           style={{ marginTop: 16 }}
           disabled={!file || uploadMut.isPending}
           onClick={() => uploadMut.mutate()}
@@ -270,30 +268,19 @@ export default function DrawingsPage() {
 
       {/* Table */}
       <section className="card" style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Uploaded drawings</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: 'var(--teal-bright)' }}>Uploaded drawings</h2>
         {isLoading ? (
-          <p style={{ color: '#6b7280' }}>Loading…</p>
+          <p style={{ color: 'var(--text-dim)' }}>Loading…</p>
         ) : drawings.length === 0 ? (
-          <p style={{ color: '#6b7280' }}>No drawings yet.</p>
+          <p style={{ color: 'var(--text-dim)' }}>No drawings yet.</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table>
-              <thead>
-                <tr>
-                  <th>Drawing No.</th>
-                  <th>Title</th>
-                  <th>Type</th>
-                  <th>Plant</th>
-                  <th>Rev</th>
-                  <th>Role</th>
-                  <th>Uploaded</th>
-                  <th />
-                </tr>
-              </thead>
+              <thead><tr><th>Drawing No.</th><th>Title</th><th>Type</th><th>Plant</th><th>Rev</th><th>Role</th><th>Uploaded</th><th /></tr></thead>
               <tbody>
-                {drawings.map((d) => (
-                  <tr key={d.id}>
-                    <td>{d.drawing_number}</td>
+                {drawings.map((d, idx) => (
+                  <tr key={d.id} style={{ background: idx % 2 === 0 ? 'var(--bg-card)' : 'rgba(20,184,166,0.03)' }}>
+                    <td style={{ fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--teal-bright)' }}>{d.drawing_number}</td>
                     <td>{d.drawing_title || '—'}</td>
                     <td>{d.drawing_type || d.detected_drawing_type || '—'}</td>
                     <td>{d.plant || d.detected_plant || '—'}</td>
@@ -301,7 +288,7 @@ export default function DrawingsPage() {
                     <td>
                       <span className="badge gray">{d.drawing_role?.replace(/_/g, ' ')}</span>
                     </td>
-                    <td style={{ fontSize: 12, color: '#6b7280' }}>{d.created_at?.slice(0, 10) || '—'}</td>
+                    <td style={{ fontSize: 12, color: 'var(--text-dim)' }}>{d.created_at?.slice(0, 10) || '—'}</td>
                     <td>
                       <button type="button" className="sm danger" onClick={() => deleteMut.mutate(d.id)}>
                         Delete
@@ -314,7 +301,7 @@ export default function DrawingsPage() {
           </div>
         )}
         {drawings.some((d) => d.extraction_error) && (
-          <p style={{ fontSize: 12, color: '#b45309', marginTop: 8 }}>
+          <p style={{ fontSize: 12, color: 'var(--amber)', marginTop: 8 }}>
             Some files had partial text extraction. Use manual fields on next upload if needed.
           </p>
         )}
@@ -322,7 +309,7 @@ export default function DrawingsPage() {
 
       {/* Section 2 */}
       <section className="card" style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>2. Run comparison</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: 'var(--teal-bright)' }}>2. Run comparison</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div className="form-group">
             <label>Drawing A</label>
@@ -348,19 +335,11 @@ export default function DrawingsPage() {
           </div>
         </div>
         {previewType && (
-          <p style={{ marginTop: 10, fontSize: 13, color: '#1d4ed8' }}>
+          <p style={{ marginTop: 10, fontSize: 13, color: 'var(--teal-bright)' }}>
             This will run: <strong>{comparisonLabel(previewType)}</strong>
           </p>
         )}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: 14,
-            marginTop: 16,
-          }}
-        >
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, marginTop: 16 }}>
           <button
             type="button"
             className="accent"
@@ -371,25 +350,15 @@ export default function DrawingsPage() {
           </button>
           {compareBusy && (
             <div style={{ flex: '1 1 220px', minWidth: 200, maxWidth: 480 }}>
-              <div
-                style={{
-                  height: 10,
-                  background: '#e5e7eb',
-                  borderRadius: 5,
-                  overflow: 'hidden',
-                  border: '1px solid #d1d5db',
-                }}
-              >
+              <div className="progress-track">
                 <div
+                  className="progress-fill"
                   style={{
                     width: `${Math.min(100, Math.max(0, comparePct))}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, #2563eb, #3b82f6)',
-                    transition: 'width 0.35s ease',
                   }}
                 />
               </div>
-              <div style={{ fontSize: 12, color: '#4b5563', marginTop: 6, lineHeight: 1.4 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.4 }}>
                 <strong>{Math.round(comparePct)}%</strong>
                 {compareMsg ? ` — ${compareMsg}` : ''}
               </div>
@@ -400,44 +369,33 @@ export default function DrawingsPage() {
 
       {/* Section 3 */}
       <section className="card" id="comparisons">
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>3. Comparison history</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: 'var(--teal-bright)' }}>3. Comparison history</h2>
         {comparisons.length === 0 ? (
-          <p style={{ color: '#6b7280' }}>No comparisons yet.</p>
+          <p style={{ color: 'var(--text-dim)' }}>No comparisons yet.</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Drawing A</th>
-                  <th>Drawing B</th>
-                  <th>Type</th>
-                  <th>New</th>
-                  <th>Removed</th>
-                  <th>Changed</th>
-                  <th style={{ minWidth: 220 }}>Actions</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Date</th><th>Drawing A</th><th>Drawing B</th><th>Type</th><th>New</th><th>Removed</th><th>Changed</th><th style={{ minWidth: 220 }}>Actions</th></tr></thead>
               <tbody>
-                {comparisons.map((c) => (
-                  <tr key={c.id}>
-                    <td style={{ fontSize: 12 }}>{c.run_at?.slice(0, 19)?.replace('T', ' ') || '—'}</td>
-                    <td>{c.drawing_a}</td>
-                    <td>{c.drawing_b}</td>
+                {comparisons.map((c, idx) => (
+                  <tr key={c.id} style={{ background: idx % 2 === 0 ? 'var(--bg-card)' : 'rgba(20,184,166,0.03)' }}>
+                    <td style={{ fontSize: 12, color: 'var(--text-dim)' }}>{c.run_at?.slice(0, 19)?.replace('T', ' ') || '—'}</td>
+                    <td style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--teal-bright)' }}>{c.drawing_a}</td>
+                    <td style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--teal-bright)' }}>{c.drawing_b}</td>
                     <td>
                       <span className="badge blue">{comparisonLabel(c.comparison_type)}</span>
                     </td>
                     <td>{c.total_new}</td>
                     <td>{c.total_removed}</td>
                     <td>{c.total_subsystem_changes}</td>
-                    <td>
-                      <Link to={`/project/${projectId}/comparison/${c.id}`} style={{ marginRight: 8 }}>
+                    <td style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <Link to={`/project/${projectId}/comparison/${c.id}`} style={{ color: 'var(--teal-bright)', fontWeight: 500, textDecoration: 'none' }}>
                         View
                       </Link>
                       <button
                         type="button"
                         className="sm"
-                        style={{ border: 'none', background: 'none', color: '#2563eb', padding: 0 }}
+                        style={{ border: 'none', background: 'none', color: 'var(--teal-bright)', padding: 0, cursor: 'pointer' }}
                         onClick={async () => {
                           try {
                             const res = await api.get(`/drawings/${projectId}/report`, {
@@ -459,8 +417,8 @@ export default function DrawingsPage() {
                       </button>
                       <button
                         type="button"
-                        className="sm"
-                        style={{ border: 'none', background: 'none', color: '#b91c1c', padding: 0, marginLeft: 10 }}
+                        className="sm danger"
+                        style={{ border: 'none', background: 'none', padding: 0 }}
                         disabled={deleteComparisonMut.isPending}
                         onClick={() => {
                           if (!window.confirm('Delete this comparison from history? This cannot be undone.')) return

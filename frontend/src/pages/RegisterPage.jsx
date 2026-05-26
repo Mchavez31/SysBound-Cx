@@ -41,17 +41,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)' }}>
       <div style={{ width: '100%', maxWidth: 400, padding: '0 16px' }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ width: 48, height: 48, background: '#1a2744', borderRadius: 12, margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+          <div style={{ width: 48, height: 48, background: 'var(--teal-dim)', borderRadius: 12, margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--border-bright)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal-bright)" strokeWidth="2" strokeLinecap="round">
               <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
               <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
             </svg>
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 600, color: '#111827', marginBottom: 4 }}>Create your account</h1>
-          <p style={{ color: '#6b7280', fontSize: 14 }}>Get started with Systemization Platform</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>Create your account</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Get started with Systemization Platform</p>
         </div>
         <div className="card">
           <form onSubmit={handleSubmit}>
@@ -67,13 +67,13 @@ export default function RegisterPage() {
               <label>Password</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 8 characters" required />
             </div>
-            <button type="submit" className="primary" style={{ width: '100%' }} disabled={loading}>
+            <button type="submit" className="accent" style={{ width: '100%' }} disabled={loading}>
               {loading ? 'Creating account…' : 'Create account'}
             </button>
           </form>
         </div>
-        <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: '#6b7280' }}>
-          Already have an account? <Link to="/login" style={{ color: '#2563eb', fontWeight: 500 }}>Sign in</Link>
+        <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--text-secondary)' }}>
+          Already have an account? <Link to="/login" style={{ color: 'var(--teal-bright)', fontWeight: 500 }}>Sign in</Link>
         </p>
       </div>
     </div>
