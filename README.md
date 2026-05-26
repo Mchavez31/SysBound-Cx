@@ -2,11 +2,10 @@
 
 Multi-project engineering drawing commissioning and systemization tool.
 
-> **Note:** SysBound Cx is currently a local development application. There is no public live demo URL yet. Clone the repo and run locally (see setup below), or view the project on the [MRC Portfolio](https://mrc-portfolio.vercel.app).
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Mchavez31/SysBound-Cx)
 
-### Repository vs live app
-
-This GitHub page shows the **source code** and README. The app itself runs locally during development (frontend + API). A public deployment may be added later.
+> **Live app:** https://mchavez31.github.io/SysBound-Cx/  
+> Login requires the Render API — use the Deploy button above, then run `.\scripts\setup-live.ps1` from PowerShell.
 
 ---
 

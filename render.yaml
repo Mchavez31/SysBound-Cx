@@ -15,7 +15,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: FRONTEND_URL
-        value: https://mchavez31.github.io
+        value: https://mchavez31.github.io/SysBound-Cx
       - key: PYTHON_VERSION
         value: "3.11.9"
 

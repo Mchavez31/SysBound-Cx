@@ -33,7 +33,12 @@ jobs:
         run: npm run build
         working-directory: frontend
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          # Set in repo Settings → Secrets and variables → Actions → Variables: VITE_API_URL
+          # Example: https://sysbound-cx-api.onrender.com/api
+          VITE_API_URL: ${{ vars.VITE_API_URL || secrets.VITE_API_URL }}
+      - name: SPA fallback for GitHub Pages routes
+        run: cp dist/index.html dist/404.html
+        working-directory: frontend
       # Required so Pages accepts the artifact (see GitHub Pages + Actions docs)
       - name: Setup Pages
         uses: actions/configure-pages@v5
