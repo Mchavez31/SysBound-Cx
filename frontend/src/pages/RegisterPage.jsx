@@ -51,7 +51,7 @@ export default function RegisterPage() {
             </svg>
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>Create your account</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Get started with Systemization Platform</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Get started with SysBound Cx</p>
         </div>
         <div className="card">
           <form onSubmit={handleSubmit}>

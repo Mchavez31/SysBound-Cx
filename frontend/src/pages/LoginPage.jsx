@@ -47,7 +47,7 @@ export default function LoginPage() {
               <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
             </svg>
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>Systemization Platform</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>SysBound Cx</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Sign in to your account</p>
         </div>
         <div className="card">
